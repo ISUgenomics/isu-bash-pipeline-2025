@@ -1,2 +1,32 @@
 # isu-bash-pipeline-2025
 Introduction to pipeline development in bash
+
+## Workshop 2 - Introduction to Pipeline Development with Bash - September 23rd, 2025 (1pm-5pm)
+
+Workshop 2 is an introductory course into pipeline development within a bash environment. Pipelines are a fundamental part of many development workflows, allowing for efficient automation and chaining of commands. Users will learn what is a pipeline, basic scripting including the use of variables and loops, using GNU Parallel for parallelization, and a basic introduction into Nextflow. This course will lead perfectly into workshop three. 
+
+## Naming Conventions
+
+- **Common styles (for reference)**
+  - `camelCase` — first word lowercase, subsequent words capitalized; avoid in Bash.
+  - `PascalCase` — every word capitalized; avoid in Bash.
+  - `snake_case` — words separated by underscores; good for Bash identifiers and filenames.
+  - `kebab-case` — words separated by hyphens; good for filenames/directories, not valid for variables.
+  - `dot.separated` — words separated by periods; reserve dot for file extensions (e.g., `.sh`, `.log`).
+  - `UPPER_SNAKE_CASE` — underscores with all caps; common for constants and environment variables.
+
+- **Workshop standard (what we will use)**
+  - Files and directories: `snake_case` (e.g., `data/`, `data/raw/`, `scripts/quality_control/`). No spaces.
+  - Shell scripts: numbered + `snake_case` + `.sh` (e.g., `00_setup.sh`, `10_quality_control.sh`).
+  - Log files: `stepname_YYYYMMDD-HHMMSS.log` (e.g., `quality_control_20250923-1300.log`).
+  - Avoid additional dots in names (use only for extensions). Avoid spaces and special characters.
+
+- **Shell script identifiers**
+  - Variables (default): `lower_snake_case` (e.g., `input_dir`, `sample_id`).
+  - Constants/env or exported parameters: `UPPER_SNAKE_CASE` (e.g., `THREADS`, `REF_GENOME`).
+  - Functions: `lower_snake_case` (e.g., `run_qc()`, `parse_args()`).
+  - Positional parameters: refer as `$1`, `$2`, etc.; assign to named `lower_snake_case` variables early for clarity.
+
+  ## Resources
+
+  - [Shell Scripting - Rules for Naming Variable Name](https://www.geeksforgeeks.org/shell-scripting-rules-for-naming-variable-name/)
