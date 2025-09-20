@@ -196,3 +196,65 @@ do
 done
 ```
 
+#### Multiple files (GNU Parallel)
+
+Let us now use GNU Parallel to run the FastQC analysis on all files in parallel.
+The first step is go for a dry run to see what commands will be executed.
+
+```bash
+module load parallel 
+mkdir -p 02d_fastqc_parallel
+parallel --dry-run -j 8 fastqc {} -o 02d_fastqc_parallel/ &> logs/02_fastqc_parallel.log ::: 01_data/*.fastq.gz
+```
+
+- `parallel --dry-run -j 8 fastqc {} -o 02d_fastqc_parallel/ ::: 01_data/*.fastq.gz`
+  - `--dry-run` prints the commands that would be executed, without running them. Use this to verify first.
+  - `-j 8` means run up to 8 jobs at the same time (choose based on cores available to you).
+  - `fastqc {}` is the command template; `{}` will be replaced by each input filename.
+  - `-o 02d_fastqc_parallel/` sends FastQC outputs into that directory.
+  - `:::` introduces the list of inputs to feed to GNU Parallel; here the shell expands `01_data/*.fastq.gz` to all matching files.
+- `&> logs/02_fastqc_parallel.log` captures both stdout and stderr into the log file so you can review what happened.
+
+To actually run the commands (not just show them), remove `--dry-run`:
+
+```bash
+module load parallel
+mkdir -p 02d_fastqc_parallel
+basename=$(basename "$file" .fastq.gz)
+parallel -j 8 fastqc {} -o 02d_fastqc_parallel/ &> logs/02_fastqc_parallel_$basename.log ::: 01_data/*.fastq.gz
+```
+
+Add the above script to `00_scripts/04_fastqc_parallel.sh`.
+
+Make it executable:
+
+```bash
+chmod +x 00_scripts/04_fastqc_parallel.sh
+```
+
+Run the script:
+
+```bash
+time ./00_scripts/04_fastqc_parallel.sh
+```
+
+<details>
+<summary>Output</summary>
+<pre>
+real    0m26.453s
+user    2m1.143s
+sys     0m3.962s
+</pre>
+</details>
+
+- **What these mean**
+  - `real`: Wall-clock time — how long the command took from start to finish in the real world (what you waited).
+  - `user`: Total CPU time spent running your program’s code in user space. With multiple cores or parallel jobs, this is the sum across all processes/cores and can be greater than `real`.
+  - `sys`: CPU time spent in the kernel (e.g., doing I/O, file operations).
+
+- **Why `user` > `real` here**
+  - Because we ran multiple tasks concurrently (e.g., via loops or GNU Parallel), CPU time across cores adds up. If 8 cores each do ~15 seconds of work, `user` could be ~120 seconds while `real` is ~15–30 seconds.
+
+- **How to interpret**
+  - Use `real` to estimate elapsed time for the end-to-end run (what you experience).
+  - Use `user + sys` to gauge how much total CPU work was consumed. Large gaps between `real` and `user+sys` often indicate parallelism; very small `user`/`sys` compared to `real` can indicate waiting on I/O.
