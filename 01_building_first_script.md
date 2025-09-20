@@ -58,17 +58,18 @@ Remove the folders created
 rm -rf 02_fastqc
 ```
 
-##### Add the command to a script and save it as `fastqc_01.sh` in `00_scripts` directory.
+##### Add the command to a script and save it as `01_fastqc.sh` in `00_scripts` directory.
 
 ```bash
-cat 00_scripts/fastqc_01.sh
+cat 00_scripts/01_fastqc.sh
 ```
 
 <details>
 <summary>Output</summary>
 <pre>
+mkdir -p logs
 mkdir -p 02_fastqc
-fastqc 01_data/bio_sample_01_R1.fastq.gz -o 02_fastqc/
+fastqc 01_data/bio_sample_01_R1.fastq.gz -o 02_fastqc/ &> logs/fastqc_01.log
 </pre>
 </details>
 
@@ -83,3 +84,35 @@ chmod +x fastqc_01.sh
 ```bash
 ./fastqc_01.sh
 ```
+
+#### Multiple files (looping through files)
+
+A simple example:
+
+```bash
+# A simple loop example: list files in 01_data/
+for file in 01_data/*.fastq.gz; 
+do
+  echo "Found file: $file"
+done
+```
+
+The `for ... in ...; do ... done` construct repeats the commands between `do` and `done` for each matched file.
+
+`01_data/*.fastq.gz` expands (globs) to all FASTQ files in the `01_data/` directory.
+
+`$file` is a shell variable that holds the current filename; `echo` prints text to the terminal.
+
+Run `FastQC` on all files in `01_data/`:
+
+```bash
+mkdir -p 02b_fastqc_loop
+
+for file in 01_data/*.fastq.gz; do
+  echo "Running FastQC on: $file"
+  fastqc $file -o 02b_fastqc_loop/ &> logs/fastqc_02b.log
+done
+```
+
+Save this script as `02_fastqc_loop.sh` in `00_scripts` directory.
+
