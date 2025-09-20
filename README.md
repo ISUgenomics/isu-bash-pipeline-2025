@@ -29,6 +29,11 @@ Workshop 2 is an introductory course into pipeline development within a bash env
   git clone <link_goes_here>
   ```
 
+## SSH
+
+- Through Nova OnDemand
+- Get a terminal
+
 ## Naming Conventions
 
 - **Common styles (for reference)**
