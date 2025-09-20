@@ -5,6 +5,30 @@ Introduction to pipeline development in bash
 
 Workshop 2 is an introductory course into pipeline development within a bash environment. Pipelines are a fundamental part of many development workflows, allowing for efficient automation and chaining of commands. Users will learn what is a pipeline, basic scripting including the use of variables and loops, using GNU Parallel for parallelization, and a basic introduction into Nextflow. This course will lead perfectly into workshop three. 
 
+## Quick start
+
+- VS Code Server on Nova OnDemand through a browser: `https://nova-ondemand.its.iastate.edu/`
+
+  ```
+  Account: short_term
+  Partition: interactive
+  ```
+
+- File -> Open Folder -> `/work/short_term/<your username>/` - create the directory if it does not exist:
+
+  ```bash
+  cd /work/short_term/
+  mkdir $USER
+  ```
+
+- Then do File -> Open Folder -> `/work/short_term/<your username>/`
+
+- Clone git repository:
+
+  ```bash
+  git clone <link_goes_here>
+  ```
+
 ## Naming Conventions
 
 - **Common styles (for reference)**
