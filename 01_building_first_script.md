@@ -69,9 +69,16 @@ cat 00_scripts/01_fastqc.sh
 <pre>
 mkdir -p logs
 mkdir -p 02_fastqc
-fastqc 01_data/bio_sample_01_R1.fastq.gz -o 02_fastqc/ &> logs/01_fastqc.log
+fastqc 01_data/bio_sample_01_R1.fastq.gz -o 02_fastqc/ > logs/01_fastqc.log 2>&1
 </pre>
 </details>
+
+- Explanation of the command in the script:
+  - `fastqc 01_data/bio_sample_01_R1.fastq.gz -o 02_fastqc/` runs FastQC on the input file and writes the results to the `02_fastqc/` directory.
+  - `> logs/01_fastqc.log` redirects standard output (stdout, file descriptor 1) to the log file, overwriting it if it exists.
+  - `2>&1` redirects standard error (stderr, file descriptor 2) to the same destination as stdout, so both stdout and stderr end up in `logs/01_fastqc.log`.
+  - This pattern is useful to capture all program messages for troubleshooting and record-keeping. Ensure `logs/` exists (we created it with `mkdir -p logs`).
+  - Tip: If you want to see the output live and also save it, you can use `tee`, e.g., `... 2>&1 | tee logs/01_fastqc.log`.
 
 ##### Make the script an executable file
 
@@ -196,6 +203,67 @@ do
 done
 ```
 
+Save this script as `02_fastqc_loop_basename.sh` in `00_scripts` directory.
+
+Make it executable:
+
+```bash
+chmod +x 00_scripts/02_fastqc_loop_basename.sh
+```
+
+Run the script:
+
+```bash
+time ./00_scripts/02_fastqc_loop_basename.sh
+```
+
+Check the log files:
+
+```bash
+less logs/*bio_sample*log
+```
+
+Using `less` we can view the contents of the log files. To move from one file to the next, use the `:n` command within `less`. To move to the previous file, use the `:p` command.
+
+To check if all files have been processed, we can use the `grep` command.
+
+```bash
+grep "Analysis complete" logs/*bio_sample*log
+```
+
+<details>
+<summary>Output</summary>
+<pre>
+logs/02_fastqc_loop_bio_sample_01_R1.log:Analysis complete for bio_sample_01_R1.fastq.gz
+logs/02_fastqc_loop_bio_sample_01_R2.log:Analysis complete for bio_sample_01_R2.fastq.gz
+logs/02_fastqc_loop_bio_sample_02_R1.log:Analysis complete for bio_sample_02_R1.fastq.gz
+logs/02_fastqc_loop_bio_sample_02_R2.log:Analysis complete for bio_sample_02_R2.fastq.gz
+logs/02_fastqc_loop_bio_sample_03_R1.log:Analysis complete for bio_sample_03_R1.fastq.gz
+logs/02_fastqc_loop_bio_sample_03_R2.log:Analysis complete for bio_sample_03_R2.fastq.gz
+logs/02_fastqc_loop_bio_sample_04_R1.log:Analysis complete for bio_sample_04_R1.fastq.gz
+logs/02_fastqc_loop_bio_sample_04_R2.log:Analysis complete for bio_sample_04_R2.fastq.gz
+logs/02_fastqc_loop_bio_sample_05_R1.log:Analysis complete for bio_sample_05_R1.fastq.gz
+logs/02_fastqc_loop_bio_sample_05_R2.log:Analysis complete for bio_sample_05_R2.fastq.gz
+</pre>
+</details>
+
+##### Using shell variables in the loop helps to make the script more readable, maintainable, and reusable.
+
+```bash
+INPUT_DIR=01_data
+OUTPUT_DIR=02c_fastqc_loop_
+LOG_DIR=logs
+
+mkdir -p $OUTPUT_DIR
+
+for file in $INPUT_DIR/*.fastq.gz; 
+do  
+  basename=$(basename "$file" .fastq.gz)
+  echo "Running FastQC on: $basename"
+  fastqc $file -o $OUTPUT_DIR/ &> $LOG_DIR/02_fastqc_loop_$basename.log
+done
+```
+
 #### Multiple files (GNU Parallel)
 
 Let us now use GNU Parallel to run the FastQC analysis on all files in parallel.
@@ -204,7 +272,7 @@ The first step is go for a dry run to see what commands will be executed.
 ```bash
 module load parallel 
 mkdir -p 02d_fastqc_parallel
-parallel --dry-run -j 8 fastqc {} -o 02d_fastqc_parallel/ &> logs/02_fastqc_parallel.log ::: 01_data/*.fastq.gz
+parallel --dry-run -j 8 fastqc {} -o 02d_fastqc_parallel/ ::: 01_data/*.fastq.gz
 ```
 
 - `parallel --dry-run -j 8 fastqc {} -o 02d_fastqc_parallel/ ::: 01_data/*.fastq.gz`
@@ -213,16 +281,22 @@ parallel --dry-run -j 8 fastqc {} -o 02d_fastqc_parallel/ &> logs/02_fastqc_para
   - `fastqc {}` is the command template; `{}` will be replaced by each input filename.
   - `-o 02d_fastqc_parallel/` sends FastQC outputs into that directory.
   - `:::` introduces the list of inputs to feed to GNU Parallel; here the shell expands `01_data/*.fastq.gz` to all matching files.
-- `&> logs/02_fastqc_parallel.log` captures both stdout and stderr into the log file so you can review what happened.
 
 To actually run the commands (not just show them), remove `--dry-run`:
 
 ```bash
 module load parallel
 mkdir -p 02d_fastqc_parallel
-basename=$(basename "$file" .fastq.gz)
-parallel -j 8 fastqc {} -o 02d_fastqc_parallel/ &> logs/02_fastqc_parallel_$basename.log ::: 01_data/*.fastq.gz
+parallel -j8 --dry-run \
+  'fastqc {1} -o 02d_fastqc_parallel/ > logs/02_fastqc_parallel_{1/.}.log 2>&1' \
+  ::: 01_data/*.fastq.gz
 ```
+
+- The trailing `\` characters are line continuations so the long command is split across multiple lines for readability.
+- Quotes `'...'` keep the whole FastQC template as one string so that GNU Parallel, not your shell, substitutes `{1}` and `{1/.}`.
+- `{1}` is the first input argument (each file matched by the glob). With a single input source, `{}` and `{1}` are equivalent.
+- `{1/.}` is a GNU Parallel filename modifier: it expands to the basename of the first input with the final extension removed (and without the directory). This lets us name per-file logs like `logs/02_fastqc_parallel_bio_sample_01_R1.log`.
+- `> logs/02_fastqc_parallel_{1/.}.log 2>&1` writes both stdout and stderr of each FastQC run to a separate log file derived from the input name.
 
 Add the above script to `00_scripts/04_fastqc_parallel.sh`.
 
@@ -258,3 +332,59 @@ sys     0m3.962s
 - **How to interpret**
   - Use `real` to estimate elapsed time for the end-to-end run (what you experience).
   - Use `user + sys` to gauge how much total CPU work was consumed. Large gaps between `real` and `user+sys` often indicate parallelism; very small `user`/`sys` compared to `real` can indicate waiting on I/O.
+
+#### Cleaned up shell script
+
+```bash
+#!/usr/bin/env bash # shebang or hashbang line
+
+set -euo pipefail # error handling: 
+                  # -e: exit immediately if any command returns a non-zero exit status (error) 
+                  # -u: treat unset variables as an error and exit (useful for debugging)
+                  # -o pipefail: exit if any command in a pipeline fails (useful for debugging)
+
+# Directories
+# Input directory
+INPUT_DIR="01_data"
+
+# Output directory
+OUTPUT_DIR="02d_fastqc_parallel"
+
+# Log directory
+LOG_DIR="logs"
+
+# Create required directories
+mkdir -p "$OUTPUT_DIR" "$LOG_DIR"
+
+# Load required modules
+module load parallel
+module load fastqc
+
+# Run FastQC
+parallel -j8 \
+  'fastqc {1} -o $OUTPUT_DIR/ > logs/02_fastqc_parallel_{1/.}.log 2>&1' \
+  ::: $INPUT_DIR/*.fastq.gz
+```
+
+Add the above script to `00_scripts/05_fastqc_parallel_improved.sh`.
+
+Make it executable:
+
+```bash
+chmod +x 00_scripts/05_fastqc_parallel_improved.sh
+```
+
+Run the script:
+
+```bash
+time ./00_scripts/05_fastqc_parallel_improved.sh
+```
+
+<details>
+<summary>Output</summary>
+<pre>
+real    0m30.624s
+user    2m53.930s
+sys     0m6.853s
+</pre>
+</details>
