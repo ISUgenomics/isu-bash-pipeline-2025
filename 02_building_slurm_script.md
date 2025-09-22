@@ -1,4 +1,4 @@
-# Building a SLURM script (very basics)
+# Building a SLURM script
 
 SLURM (Simple Linux Utility for Resource Management) is the job scheduler that manages who gets to use the cluster’s compute nodes and for how long. You will log in to a head/login node to prepare your work, and then ask SLURM to run your jobs on compute nodes with the resources you request.
 
@@ -14,7 +14,7 @@ If you remember just one thing: you don’t run heavy work directly on the head 
 
 ---
 
-## Key words (plain language)
+## Key words
 
 - **Cluster**: Many connected computers that can work in parallel.
 - **Head/Login node**: Where you log in, write scripts, submit jobs. Do not run heavy jobs here.
