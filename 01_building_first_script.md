@@ -83,7 +83,7 @@ fastqc 01_data/bio_sample_01_R1.fastq.gz -o 02_fastqc/ > logs/01_fastqc.log 2>&1
 ##### Make the script an executable file
 
 ```bash
-chmod +x 01_fastqc.sh
+chmod +x 00_scripts/01_fastqc.sh
 ```
 
 ##### Run the script
