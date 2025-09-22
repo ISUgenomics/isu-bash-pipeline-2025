@@ -89,7 +89,7 @@ chmod +x 01_fastqc.sh
 ##### Run the script
 
 ```bash
-./01_fastqc.sh
+./00_scripts/01_fastqc.sh 
 ```
 
 #### Multiple files (looping through files)
