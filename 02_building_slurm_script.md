@@ -17,7 +17,7 @@ If you remember just one thing: you don’t run heavy work directly on the head 
 ## Key words (plain language)
 
 - **Cluster**: Many connected computers that can work in parallel.
-- **Head/Login node**: Where you log in, write scripts, submit jobs. Don’t run heavy jobs here.
+- **Head/Login node**: Where you log in, write scripts, submit jobs. Do not run heavy jobs here.
 - **Compute node**: Where your jobs actually run.
 - **Job**: A task you ask SLURM to run. It gets a numeric Job ID.
 - **Partition (queue)**: A grouping of nodes with certain limits (e.g., time, size). You submit jobs to a partition.
@@ -43,11 +43,6 @@ squeue -u $USER
 # What partitions exist? (short summary)
 sinfo
 
-# Submit a batch script
-touch example.sh   # your script
-echo "#!/usr/bin/env bash" > example.sh
-sbatch example.sh
-
 # Cancel a job by its Job ID
 scancel <JOBID>
 
@@ -56,98 +51,6 @@ scontrol show job <JOBID>
 ```
 
 Tip: Use `history | grep sbatch` to find previous submissions.
-
----
-
-## A minimal SLURM batch script
-
-Create a file named `00_scripts/10_hello_slurm.sh` with the following contents. This is a tiny job that just prints some info on a compute node.
-
-```bash
-#!/usr/bin/env bash
-
-# ===== SLURM directives (read by the scheduler) =====
-#SBATCH --job-name=hello_slurm            # a short name for your job
-#SBATCH --account=short_term              # account/allocation (from workshop Quick start)
-#SBATCH --partition=interactive           # partition/queue (from workshop Quick start)
-#SBATCH --time=00:05:00                   # max wall time (hh:mm:ss)
-#SBATCH --cpus-per-task=1                 # number of CPU cores
-#SBATCH --mem=1G                          # memory per node (or per CPU on some clusters)
-#SBATCH --output=logs/%x_%j.out           # STDOUT (%x=job-name, %j=jobid)
-#SBATCH --error=logs/%x_%j.err            # STDERR
-
-set -euo pipefail
-
-# Make sure the log directory exists
-mkdir -p logs
-
-# ===== Your commands run on a compute node below this line =====
-
-echo "Hello from SLURM!"
-
-# Show where we are running
-hostname
-
-# Show some environment information
-printf "\nSLURM job info:\n"
-echo "JOB_ID=$SLURM_JOB_ID"
-echo "JOB_NAME=$SLURM_JOB_NAME"
-echo "CPUS=$SLURM_CPUS_PER_TASK"
-```
-
-How to submit and check:
-
-```bash
-chmod +x 00_scripts/10_hello_slurm.sh
-sbatch 00_scripts/10_hello_slurm.sh
-squeue -u $USER            # see it pending or running
-
-# After it finishes, check logs
-ls -l logs/
-cat logs/hello_slurm_*.out
-cat logs/hello_slurm_*.err
-```
-
-What the SLURM options mean (simple):
-
-- `--account` and `--partition`: pick where the job runs and which allocation it uses. For this workshop: `short_term` + `interactive`.
-- `--time`: SLURM stops jobs that exceed this time. Request a little more than you expect.
-- `--cpus-per-task`: how many CPU cores your program can use.
-- `--mem`: how much RAM your job needs. If you request too little, your job may be killed.
-- `--output` and `--error`: where standard output and error messages go.
-
----
-
-## Moving from one-off commands to a SLURM script
-
-Earlier you ran tools like `fastqc` directly or in loops. With SLURM you put those same commands into a batch script and add `#SBATCH` lines at the top to ask for resources. Example skeleton:
-
-```bash
-#!/usr/bin/env bash
-#SBATCH --job-name=my_task
-#SBATCH --account=short_term
-#SBATCH --partition=interactive
-#SBATCH --time=00:30:00
-#SBATCH --cpus-per-task=4
-#SBATCH --mem=8G
-#SBATCH --output=logs/%x_%j.out
-#SBATCH --error=logs/%x_%j.err
-
-set -euo pipefail
-mkdir -p logs
-
-# Load modules if needed
-# module load fastqc
-
-# Your actual work
-# fastqc 01_data/bio_sample_01_R1.fastq.gz -o 02_fastqc/
-```
-
-Then submit with:
-
-```bash
-sbatch 00_scripts/my_task.sh
-```
 
 ---
 
@@ -165,18 +68,131 @@ You’ll get a shell on a compute node where you can run commands interactively.
 
 ---
 
-## Common questions
+## Running a SLURM job
 
-- Why is my job PENDING? Often because the partition is full or your request is too large. Check `sinfo` and consider lowering CPUs/mem/time.
-- Where are my logs? In the files you set with `--output` and `--error` (we used the `logs/` directory).
-- How do I stop a job? `scancel <JOBID>`.
+We are going to use the `05_fastqc_parallel_improved.sh` script as an example.
+
+```bash
+#!/usr/bin/env bash
+
+# ===== SLURM directives (read by the scheduler) =====
+#SBATCH --job-name=fastqc            # a short name for your job
+#SBATCH --account=short_term              # account/allocation
+#SBATCH --partition=interactive           # partition/queue
+#SBATCH --time=00:05:00                   # max wall time (hh:mm:ss)
+#SBATCH --nodes=1                         # number of nodes
+#SBATCH --cpus-per-task=10                 # number of CPU cores
+#SBATCH --mem=8G                          # memory per node
+#SBATCH --output=logs/%x_%j.out           # STDOUT (%x=job-name, %j=jobid)
+#SBATCH --error=logs/%x_%j.err            # STDERR
+#SBATCH --mail-user=user@iastate.edu  # email address
+#SBATCH --mail-type=ALL                   # send email on all events, BEGIN, END, FAIL
+
+set -euo pipefail
+
+00_scripts/05_fastqc_parallel_improved.sh
+```
+
+**Explanation of the directives above**
+
+- `#SBATCH --job-name=fastqc`
+  - Short, human-friendly job name. Appears in `squeue`, logs, and emails.
+
+- `#SBATCH --account=short_term`
+  - Allocation/account to charge; required to authorize the job.
+
+- `#SBATCH --partition=interactive`
+  - Which queue/partition to use. Partitions differ in limits and availability.
+
+- `#SBATCH --time=00:05:00`
+  - Maximum wall-clock time. SLURM will stop the job if it exceeds 5 minutes.
+
+- `#SBATCH --nodes=1`
+  - Number of compute nodes requested. Most single-node tools/pipelines use 1.
+
+- `#SBATCH --cpus-per-task=10`
+  - CPU cores available to your task. Match this to your internal parallelism (e.g., GNU Parallel `-j 10` or a tool’s `--threads 10`).
+
+- `#SBATCH --mem=8G`
+  - Total memory on the node reserved for your job. Ensure it covers the peak combined usage of all concurrent processes.
+
+- `#SBATCH --output=logs/%x_%j.out`
+  - File for standard output (STDOUT). `%x` = job name, `%j` = job ID (e.g., `logs/fastqc_8249780.out`).
+
+- `#SBATCH --error=logs/%x_%j.err`
+  - File for standard error (STDERR). Check here for module load messages and errors.
+
+- `#SBATCH --mail-user=user@iastate.edu`
+  - Email address to receive job notifications.
+
+- `#SBATCH --mail-type=ALL`
+  - When to send emails. `ALL` includes `BEGIN`, `END`, `FAIL`. You can choose a subset like `END,FAIL` to reduce email volume.
+
+Notes:
+- If you launch 10 FastQC processes in parallel, `--cpus-per-task=10` is appropriate; otherwise, lower it to match your actual concurrency.
+- Memory must scale with concurrency. If each process needs ~1G and you run 10 in parallel, consider `--mem=10G` or more.
+- The job starts in the submission directory by default; to be explicit, add `cd "$SLURM_SUBMIT_DIR"` near the top of the script.
+
+Save the above script as `06_fastqc.slurm` in `00_scripts` directory.
+
+**How to submit and check:**
+
+```bash
+sbatch 00_scripts/06_fastqc.slurm
+```
+
+**Check the status of the job:**
+
+```bash
+squeue -u $USER
+```
+
+<details>
+<summary>Output</summary>
+<pre>
+JOBID PARTITION     NAME     USER ST       TIME  NODES NODELIST(REASON)
+8249780 interacti   fastqc satheesh  R       0:01      1 nova21-1
+</pre>
+</details>
+
+**Check logs**
+
+```bash
+ls -lh logs/
+cat logs/fastqc_*.out
+cat logs/fastqc_*.err
+```
+
+In this case, the fastqc*.out file is empty. This is because the output of the fastqc command is redirected to the log file. The fastqc*.err file contains the error messages, particularly the loading of the modules.
+
+**Check efficiency**
+
+```bash
+seff 8249780
+```
+
+<pre>
+Job ID: 8249780
+Cluster: nova
+User/Group: satheesh/domain users
+State: COMPLETED (exit code 0)
+Nodes: 1
+Cores per node: 10
+CPU Utilized: 00:01:59
+CPU Efficiency: 59.50% of 00:03:20 core-walltime
+Job Wall-clock time: 00:00:20
+Memory Utilized: 3.27 GB
+Memory Efficiency: 40.83% of 8.00 GB (8.00 GB/node)
+</pre>
+
+**Explanation of efficiency metrics**
+
+- **CPU Utilized**: The actual time the job spent using the CPU. In this case, the job used the CPU for 1 minute and 59 seconds.
+- **CPU Efficiency**: The percentage of the requested CPU time that was actually used. Here, the job used 59.50% of the 3 minutes and 20 seconds of CPU time it requested.
+- **Job Wall-clock time**: The total time the job took to complete, from start to finish. This includes time spent waiting for resources, loading data, and running the actual computation.
+- **Memory Utilized**: The amount of memory the job actually used. In this case, the job used 3.27 GB of memory.
+- **Memory Efficiency**: The percentage of the requested memory that was actually used. Here, the job used 40.83% of the 8 GB of memory it requested.
 
 ---
 
-## Mini exercise
-
-1) Submit the `hello_slurm` script above. Find the Job ID with `squeue -u $USER`.
-2) After it completes, open the corresponding `logs/hello_slurm_<JOBID>.out` file and read the job information it printed.
-3) Change `--cpus-per-task` to 2 and resubmit. Confirm in the output that SLURM set `CPUS=2`.
-
-That’s it—you now know what SLURM is and how to submit your first job.
+## SLURM, running ARRAY jobs
