@@ -98,13 +98,13 @@ A simple example:
 
 ```bash
 # A simple loop example: list files in 01_data/
-for file in 01_data/*.fastq.gz; 
+for file in 01_data/*.fastq.gz 
 do
   echo "Found file: $file"
 done
 ```
 
-The `for ... in ...; do ... done` construct repeats the commands between `do` and `done` for each matched file.
+The `for ... in ... do ... done` construct repeats the commands between `do` and `done` for each matched file.
 
 `01_data/*.fastq.gz` expands (globs) to all FASTQ files in the `01_data/` directory.
 
@@ -115,7 +115,8 @@ Run `FastQC` on all files in `01_data/`:
 ```bash
 mkdir -p 02b_fastqc_loop
 
-for file in 01_data/*.fastq.gz; do
+for file in 01_data/*.fastq.gz
+do
   echo "Running FastQC on: $file"
   fastqc $file -o 02b_fastqc_loop/ &> logs/02_fastqc_loop.log
 done
