@@ -88,7 +88,7 @@ We are going to use the `05_fastqc_parallel_improved.sh` script as an example. I
 #SBATCH --output=logs/%x_%j.out           # STDOUT (%x=job-name, %j=jobid)
 #SBATCH --error=logs/%x_%j.err            # STDERR
 #SBATCH --mail-user=user@iastate.edu  # email address
-#SBATCH --mail-type=ALL                   # send email on all events, BEGIN, END, FAIL
+#SBATCH --mail-type=BEGIN,END                   # send email on all events, BEGIN, END, FAIL
 
 set -euo pipefail
 
@@ -242,10 +242,10 @@ FILES=(01_data/*.fastq.gz)
 TARGET="${FILES[$SLURM_ARRAY_TASK_ID]}"
 
 # Derive a clean basename for naming logs and outputs (beginner-friendly)
-BASENAME=$(basename "$TARGET" .fastq.gz)        # e.g., bio_sample_01_R1
+SAMPLENAME=$(basename "$TARGET" .fastq.gz)        # e.g., bio_sample_01_R1
 
 fastqc "$TARGET" -o 02g_fastqc_slurm_array/ \
-  > "logs/fastqc_slurm_array_${BASENAME}.log" 2>&1
+  > "logs/fastqc_slurm_array_${SAMPLENAME}.log" 2>&1
 ```
 
 ### How it works

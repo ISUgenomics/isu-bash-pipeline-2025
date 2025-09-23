@@ -1,19 +1,19 @@
 # Running commands and making a script of the commands run
 
+### What is a job?
+
+- A job is a command or a script that is run on the command line.
+
 ### What is a head node?
 
 - A head node is a node that is used to control the cluster.
-- It is the node that you will be using to run your commands.
 - It is the node that will be used to submit your jobs to the cluster.
+- Remember, we DO NOT run intensive jobs on this node. 
 
 ### What is a compute node?
 
-- A compute node is a node that is used to run your jobs.
-- It is the node that will be used to run your jobs.
+- A compute node is a node that is used to run your intensive jobs.
 
-### What is a job?
-
-- A job is a task that is run on a compute node.
 
 ### What are the files in the data folder?
 
@@ -34,6 +34,7 @@ bio_sample_01_R2.fastq.gz  bio_sample_02_R2.fastq.gz  bio_sample_03_R2.fastq.gz 
 #### One file
 
 ```bash
+module load fastqc
 mkdir -p 02_fastqc
 fastqc 01_data/bio_sample_01_R1.fastq.gz -o 02_fastqc/
 ```
@@ -195,27 +196,27 @@ The log file shows the progress of the FastQC analysis for just the last file.
 Let us now make sure that we have a log file for each file. 
 
 ```bash
-mkdir -p 02c_fastqc_loop_basename
+mkdir -p 02c_fastqc_loop_samplename
 for file in 01_data/*.fastq.gz; 
 do  
-  basename=$(basename "$file" .fastq.gz)
-  echo "Running FastQC on: $basename"
-  fastqc $file -o 02c_fastqc_loop_basename/ &> logs/02_fastqc_loop$basename.log
+  sample_id=$(basename "$file" .fastq.gz)
+  echo "Running FastQC on: $sample_id"
+  fastqc $file -o 02c_fastqc_loop_samplename/ > logs/02_fastqc_loop_$sample_id.log 2>&1
 done
 ```
 
-Save this script as `02_fastqc_loop_basename.sh` in `00_scripts` directory.
+Save this script as `03_fastqc_loop_samplename.sh` in `00_scripts` directory.
 
 Make it executable:
 
 ```bash
-chmod +x 00_scripts/02_fastqc_loop_basename.sh
+chmod +x 00_scripts/02_fastqc_loop_samplename.sh
 ```
 
 Run the script:
 
 ```bash
-time ./00_scripts/02_fastqc_loop_basename.sh
+time ./00_scripts/02_fastqc_loop_samplename.sh
 ```
 
 Check the log files:
@@ -252,7 +253,7 @@ logs/02_fastqc_loop_bio_sample_05_R2.log:Analysis complete for bio_sample_05_R2.
 
 ```bash
 INPUT_DIR=01_data
-OUTPUT_DIR=02c_fastqc_loop_
+OUTPUT_DIR=02c_fastqc_loop_samplename
 LOG_DIR=logs
 
 mkdir -p $OUTPUT_DIR

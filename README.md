@@ -26,7 +26,8 @@ Workshop 2 is an introductory course into pipeline development within a bash env
 - Clone git repository:
 
   ```bash
-  git clone <link_goes_here>
+  git clone https://github.com/ISUgenomics/isu-bash-pipeline-2025.git
+  cd isu-bash-pipeline-2025
   ```
 
 ## Terminal
@@ -45,17 +46,15 @@ Workshop 2 is an introductory course into pipeline development within a bash env
   - `UPPER_SNAKE_CASE` — underscores with all caps; common for constants and environment variables.
 
 - **Workshop standard (what we will use)**
-  - Files and directories: `snake_case` (e.g., `data/`, `data/raw/`, `scripts/quality_control/`). No spaces.
-  - Shell scripts: numbered + `snake_case` + `.sh` (e.g., `00_setup.sh`, `10_quality_control.sh`).
-  - Log files: `stepname_YYYYMMDD-HHMMSS.log` (e.g., `quality_control_20250923-1300.log`).
+  - Files and directories: `snake_case` (e.g., `01_data/`, `00_scripts/02_fastqc_loop.sh`). No spaces.
+  - Shell scripts: numbered + `snake_case` + `.sh` (e.g., `01_fastqc.sh`, `02_fastqc_loop.sh`).
+  - Log files: 
   - Avoid additional dots in names (use only for extensions). Avoid spaces and special characters.
 
 - **Shell script identifiers**
-  - Variables (default): `lower_snake_case` (e.g., `input_dir`, `sample_id`).
-  - Constants/env or exported parameters: `UPPER_SNAKE_CASE` (e.g., `THREADS`, `REF_GENOME`).
-  - Functions: `lower_snake_case` (e.g., `run_qc()`, `parse_args()`).
-  - Positional parameters: refer as `$1`, `$2`, etc.; assign to named `lower_snake_case` variables early for clarity.
-
+  - Variables (default): `lower_snake_case` (e.g., `input_dir`).
+  - Constants/env or exported parameters: `UPPER_SNAKE_CASE` (e.g., ``, ``).
+  
   ## Resources
 
   - [Shell Scripting - Rules for Naming Variable Name](https://www.geeksforgeeks.org/shell-scripting-rules-for-naming-variable-name/)
