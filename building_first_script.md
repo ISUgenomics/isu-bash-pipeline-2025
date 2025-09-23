@@ -2,17 +2,18 @@
 
 ### What is a job?
 
-- A job is a command or a script that is run on the command line.
+- A job is a command or a script that is submitted to the cluster
 
 ### What is a head node?
 
-- A head node is a node that is used to control the cluster.
-- It is the node that will be used to submit your jobs to the cluster.
-- Remember, we DO NOT run intensive jobs on this node. 
+- A head node is where you connect to cluster
+- It is the node that is used for editing files, compiling code, and submit your jobs to the cluster
+- Remember, we DO NOT run intensive jobs on this node
 
 ### What is a compute node?
 
-- A compute node is a node that is used to run your intensive jobs.
+- A compute node is a node that is used to run your intensive jobs
+- It is just a computer on the HPC cluster
 
 
 ### What are the files in the data folder?
