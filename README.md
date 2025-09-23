@@ -33,6 +33,12 @@ Workshop 2 is an introductory course into pipeline development within a bash env
   cd isu-bash-pipeline-2025
   ```
 
+## Copy data files
+
+```bash
+cp -r /work/short_term/satheesh/01_data .
+```
+
 ## Terminal
 
 - Through Nova OnDemand
@@ -49,14 +55,14 @@ Workshop 2 is an introductory course into pipeline development within a bash env
   - `UPPER_SNAKE_CASE` — underscores with all caps; common for constants and environment variables.
 
 - **Workshop standard (what we will use)**
-  - Files and directories: `snake_case` (e.g., `01_data/`, `00_scripts/02_fastqc_loop.sh`). No spaces.
+  - Files and directories: numbered + `snake_case` (e.g., `01_data/`, `00_scripts/`). No spaces.
   - Shell scripts: numbered + `snake_case` + `.sh` (e.g., `01_fastqc.sh`, `02_fastqc_loop.sh`).
   - Log files: 
   - Avoid additional dots in names (use only for extensions). Avoid spaces and special characters.
 
 - **Shell script identifiers**
-  - Variables (default): `lower_snake_case` (e.g., `input_dir`).
-  - Constants/env or exported parameters: `UPPER_SNAKE_CASE` (e.g., ``, ``).
+  - Variables (default): `lower_snake_case` (e.g., `sample_id`).
+  - Constants/env or exported parameters: `UPPER_SNAKE_CASE` (e.g., `INPUT_DIR`, `LOG_DIR`).
   
   ## Resources
 
