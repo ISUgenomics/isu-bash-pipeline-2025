@@ -12,13 +12,16 @@ Workshop 2 is an introductory course into pipeline development within a bash env
   ```
   Account: short_term
   Partition: interactive
+  Number of hour: 4
+  Number of Tasks per node: 10
+  Memory Required: 8G
   ```
 
 - File -> Open Folder -> `/work/short_term/<your username>/` - create the directory if it does not exist:
 
   ```bash
   cd /work/short_term/
-  mkdir $USER
+  mkdir -p $USER
   ```
 
 - Then do File -> Open Folder -> `/work/short_term/<your username>/`
