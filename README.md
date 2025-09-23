@@ -30,14 +30,17 @@ Workshop 2 is an introductory course into pipeline development within a bash env
 
   ```bash
   git clone https://github.com/ISUgenomics/isu-bash-pipeline-2025.git
-  cd isu-bash-pipeline-2025
   ```
 
-## Copy data files
+## Copy data files and scripts
 
 ```bash
-cp -r /work/short_term/satheesh/01_data .
+cp -a /work/short_term/workshop2_bash/01_data .
 ```
+- `a` = archive mode, which is shorthand for:  
+      -p -> preserve mode, ownership, and timestamps  
+      -R -> recursive copy (entire folder tree)  
+      plus symbolic links, devices, etc.  
 
 ## Terminal
 
