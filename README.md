@@ -1,6 +1,3 @@
-# isu-bash-pipeline-2025
-Introduction to pipeline development in bash
-
 ## Workshop 2 - Introduction to Pipeline Development with Bash - September 23rd, 2025 (1pm-5pm)
 
 Workshop 2 is an introductory course into pipeline development within a bash environment. Pipelines are a fundamental part of many development workflows, allowing for efficient automation and chaining of commands. Users will learn what is a pipeline, basic scripting including the use of variables and loops, using GNU Parallel for parallelization, and a basic introduction into Nextflow. This course will lead perfectly into workshop three. 
