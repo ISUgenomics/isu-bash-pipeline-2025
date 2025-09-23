@@ -19,12 +19,13 @@ set -euo pipefail
 cd "$SLURM_SUBMIT_DIR"
 
 # Output directory 
-OUTPUT_DIR=02g_fastqc_slurm_array
+OUTPUT_DIR=08_fastqc_slurm_array
+LOG_DIR=logs
 
 # Ensure output directories exist
 mkdir -p logs $OUTPUT_DIR
 
-# Optional: load modules needed by the job
+# Load modules needed by the job
 module load fastqc || true
 
 # Build the file list. The array index selects which file this task processes.
@@ -32,7 +33,7 @@ FILES=(01_data/*.fastq.gz)
 TARGET="${FILES[$SLURM_ARRAY_TASK_ID]}"
 
 # Derive a clean basename for naming logs and outputs (beginner-friendly)
-SAMPLENAME=$(basename "$TARGET" .fastq.gz)        # e.g., bio_sample_01_R1
+sample_id=$(basename "$TARGET" .fastq.gz)        # e.g., bio_sample_01_R1
 
-fastqc "$TARGET" -o 02g_fastqc_slurm_array/ \
-  > "logs/fastqc_slurm_array_${SAMPLENAME}.log" 2>&1
+fastqc "$TARGET" -o $OUTPUT_DIR/ \
+  > "$LOG_DIR/06_fastqc_slurm_array_${sample_id}.log" 2>&1

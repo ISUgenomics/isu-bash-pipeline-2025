@@ -72,7 +72,7 @@ You’ll get a shell on a compute node where you can run commands interactively.
 
 ## Running a SLURM job
 
-We are going to use the `05_fastqc_parallel_improved.sh` script as an example. In the `05_fastqc_parallel_improved.sh` script, change the output directory to `02f_fastqc_slurm`.
+We are going to use the `05_fastqc_parallel_improved.sh` script as an example. In the `05_fastqc_parallel_improved.sh` script, change the output directory to `07_fastqc_slurm`.
 
 ```bash
 #!/usr/bin/env bash
@@ -229,7 +229,8 @@ set -euo pipefail
 cd "$SLURM_SUBMIT_DIR"
 
 # Output directory 
-OUTPUT_DIR=02g_fastqc_slurm_array
+OUTPUT_DIR=08_fastqc_slurm_array
+LOG_DIR=logs
 
 # Ensure output directories exist
 mkdir -p logs $OUTPUT_DIR
@@ -242,10 +243,10 @@ FILES=(01_data/*.fastq.gz)
 TARGET="${FILES[$SLURM_ARRAY_TASK_ID]}"
 
 # Derive a clean basename for naming logs and outputs (beginner-friendly)
-SAMPLENAME=$(basename "$TARGET" .fastq.gz)        # e.g., bio_sample_01_R1
+sample_id=$(basename "$TARGET" .fastq.gz)        # e.g., bio_sample_01_R1
 
-fastqc "$TARGET" -o 02g_fastqc_slurm_array/ \
-  > "logs/fastqc_slurm_array_${SAMPLENAME}.log" 2>&1
+fastqc "$TARGET" -o $OUTPUT_DIR/ \
+  > "$LOG_DIR/fastqc_slurm_array_${sample_id}.log" 2>&1
 ```
 
 ### How it works
