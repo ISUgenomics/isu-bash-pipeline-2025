@@ -139,7 +139,7 @@ Save this script as `02_fastqc_loop.sh` in `00_scripts` directory.
 Make it executable:
 
 ```bash
-chmod +x 02_fastqc_loop.sh
+chmod +x 00_scripts/02_fastqc_loop.sh
 ```
 
 **Run the script**
