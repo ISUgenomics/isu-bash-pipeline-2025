@@ -4,6 +4,10 @@
 
 - A job is a command or a script that is run on command line
 
+### What is a cluster?
+
+- A cluster in computing is a group of interconnected computers (nodes) that work together as a single system
+
 ### What is a head node?
 
 - A head node is where you connect to the cluster
