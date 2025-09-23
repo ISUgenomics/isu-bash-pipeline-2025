@@ -10,8 +10,7 @@ set -euo pipefail # error handling:
 INPUT_DIR="01_data"
 
 # Output directory
-#OUTPUT_DIR="02e_fastqc_parallel_improved"
-OUTPUT_DIR="02f_fastqc_slurm"
+OUTPUT_DIR="06_fastqc_parallel_improved"
 
 # Log directory
 LOG_DIR="logs"
@@ -27,6 +26,6 @@ module load parallel
 module load fastqc
 
 # Run FastQC
-parallel -j6 \
-  'fastqc "{1}" -o "$OUTPUT_DIR/" > "$LOG_DIR/02_fastqc_parallel_{1/.}.log" 2>&1' \
+parallel -j10 \
+  'fastqc "{1}" -o "$OUTPUT_DIR/" > "$LOG_DIR/05_fastqc_parallel_improved_{1/.}.log" 2>&1' \
   ::: $INPUT_DIR/*.fastq.gz

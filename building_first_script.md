@@ -145,7 +145,7 @@ chmod +x 02_fastqc_loop.sh
 **Run the script**
 
 ```bash
-time 00_scripts/02_fastqc_loop.sh
+time ./00_scripts/02_fastqc_loop.sh
 ```
 
 <details>
@@ -237,7 +237,7 @@ chmod +x 00_scripts/03_fastqc_loop_samplename.sh
 **Run the script:**
 
 ```bash
-time 00_scripts/03_fastqc_loop_samplename.sh
+time ./00_scripts/03_fastqc_loop_samplename.sh
 ```
 
 <details>
@@ -301,9 +301,9 @@ mkdir -p 05_fastqc_parallel
 parallel --dry-run -j 10 fastqc {} -o 05_fastqc_parallel/ ::: 01_data/*.fastq.gz
 ```
 
-- `parallel --dry-run -j 8 fastqc {} -o 05_fastqc_parallel/ ::: 01_data/*.fastq.gz`
+- `parallel --dry-run -j 10 fastqc {} -o 05_fastqc_parallel/ ::: 01_data/*.fastq.gz`
   - `--dry-run` prints the commands that would be executed, without running them. Use this to verify first.
-  - `-j 8` means run up to 8 jobs at the same time (choose based on cores available to you).
+  - `-j 10` means run up to 10 jobs at the same time (choose based on cores available to you).
   - `fastqc {}` is the command template; `{}` will be replaced by each input filename.
   - `-o 05_fastqc_parallel/` sends FastQC outputs into that directory.
   - `:::` introduces the list of inputs to feed to GNU Parallel; here the shell expands `01_data/*.fastq.gz` to all matching files.
@@ -361,7 +361,7 @@ sys     0m3.962s
 #### Cleaner shell script
 
 ```bash
-#!/usr/bin/env bash # shebang or hashbang line
+#!/usr/bin/env bash
 
 set -euo pipefail # error handling: 
                   # -e: exit immediately if any command returns a non-zero exit status (error) 
@@ -373,7 +373,7 @@ set -euo pipefail # error handling:
 INPUT_DIR="01_data"
 
 # Output directory
-OUTPUT_DIR="02d_fastqc_parallel"
+OUTPUT_DIR="06_fastqc_parallel_improved"
 
 # Log directory
 LOG_DIR="logs"
@@ -381,13 +381,16 @@ LOG_DIR="logs"
 # Create required directories
 mkdir -p "$OUTPUT_DIR" "$LOG_DIR"
 
+# make them visible to subshells that parallel spawns
+export OUTPUT_DIR LOG_DIR INPUT_DIR
+
 # Load required modules
 module load parallel
 module load fastqc
 
 # Run FastQC
-parallel -j8 \
-  'fastqc {1} -o $OUTPUT_DIR/ > logs/02_fastqc_parallel_{1/.}.log 2>&1' \
+parallel -j10 \
+  'fastqc "{1}" -o "$OUTPUT_DIR/" > "$LOG_DIR/05_fastqc_parallel_improved_{1/.}.log" 2>&1' \
   ::: $INPUT_DIR/*.fastq.gz
 ```
 
