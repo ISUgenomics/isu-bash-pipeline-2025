@@ -57,7 +57,7 @@ bio_sample_01_R1_fastqc.html  bio_sample_01_R1_fastqc.zip
 Remove the folders created
 
 ```bash
-rm -rf 02_fastqc
+rm -r 02_fastqc
 ```
 
 Open `00_scripts/01_fastqc.sh` in the script window. 
