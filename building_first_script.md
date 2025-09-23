@@ -2,11 +2,11 @@
 
 ### What is a job?
 
-- A job is a command or a script that is submitted to the cluster
+- A job is a command or a script that is run on command line
 
 ### What is a head node?
 
-- A head node is where you connect to cluster
+- A head node is where you connect to the cluster
 - It is the node that is used for editing files, compiling code, and submit your jobs to the cluster
 - Remember, we DO NOT run intensive jobs on this node
 
