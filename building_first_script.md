@@ -34,6 +34,7 @@ bio_sample_01_R2.fastq.gz  bio_sample_02_R2.fastq.gz  bio_sample_03_R2.fastq.gz 
 #### One file
 
 ```bash
+module purge
 module load fastqc
 mkdir -p 02_fastqc
 fastqc 01_data/bio_sample_01_R1.fastq.gz -o 02_fastqc/
@@ -59,20 +60,14 @@ Remove the folders created
 rm -rf 02_fastqc
 ```
 
-##### Add the command to a script and save it as `01_fastqc.sh` in `00_scripts` directory.
+Open `00_scripts/01_fastqc.sh` in the script window. 
 
 ```bash
-cat 00_scripts/01_fastqc.sh
-```
-
-<details>
-<summary>Output</summary>
-<pre>
-mkdir -p logs
-mkdir -p 02_fastqc
+module purge
+module load fastqc
+mkdir -p 02_fastqc logs
 fastqc 01_data/bio_sample_01_R1.fastq.gz -o 02_fastqc/ > logs/01_fastqc.log 2>&1
-</pre>
-</details>
+```
 
 - Explanation of the command in the script:
   - `fastqc 01_data/bio_sample_01_R1.fastq.gz -o 02_fastqc/` runs FastQC on the input file and writes the results to the `02_fastqc/` directory.
@@ -81,17 +76,32 @@ fastqc 01_data/bio_sample_01_R1.fastq.gz -o 02_fastqc/ > logs/01_fastqc.log 2>&1
   - This pattern is useful to capture all program messages for troubleshooting and record-keeping. Ensure `logs/` exists (we created it with `mkdir -p logs`).
   - Tip: If you want to see the output live and also save it, you can use `tee`, e.g., `... 2>&1 | tee logs/01_fastqc.log`.
 
-##### Make the script an executable file
+**Make the script an executable file**
 
 ```bash
 chmod +x 00_scripts/01_fastqc.sh
 ```
 
-##### Run the script
+**Run the script**
 
 ```bash
-./00_scripts/01_fastqc.sh 
+time ./00_scripts/01_fastqc.sh 
 ```
+
+**Output**
+
+```
+real    0m6.949s
+user    0m7.568s
+sys     0m0.597s
+```
+
+- `real`: The wall-clock time — how long the command took from start to finish
+          Includes everything: CPU time, waiting for I/O (disk, network), scheduling delays, etc.
+- `user`: The amount of CPU time spent in user space (your program’s own code, libraries, calculations).
+          Example: crunching numbers in Python, sorting data, compressing a file.
+- `sys` : The amount of CPU time spent in kernel space (system calls and OS overhead).
+          Example: reading/writing files, allocating memory, handling I/O requests.
 
 #### Multiple files (looping through files)
 
@@ -105,21 +115,22 @@ do
 done
 ```
 
-The `for ... in ... do ... done` construct repeats the commands between `do` and `done` for each matched file.
+- The `for ... in ... do ... done` construct repeats the commands between `do` and `done` for each matched file.
+- `01_data/*.fastq.gz` expands (globs) to all FASTQ files in the `01_data/` directory.
+- `$file` is a shell variable that holds the current filename; `echo` prints text to the terminal.
 
-`01_data/*.fastq.gz` expands (globs) to all FASTQ files in the `01_data/` directory.
-
-`$file` is a shell variable that holds the current filename; `echo` prints text to the terminal.
-
-Run `FastQC` on all files in `01_data/`:
+**Run `FastQC` on all files in `01_data/`**
 
 ```bash
-mkdir -p 02b_fastqc_loop
+module purge
+module load fastqc
+
+mkdir -p 03_fastqc_loop
 
 for file in 01_data/*.fastq.gz
 do
   echo "Running FastQC on: $file"
-  fastqc $file -o 02b_fastqc_loop/ &> logs/02_fastqc_loop.log
+  fastqc $file -o 03_fastqc_loop/ > logs/02_fastqc_loop.log 2>&1
 done
 ```
 
@@ -131,10 +142,10 @@ Make it executable:
 chmod +x 02_fastqc_loop.sh
 ```
 
-##### Run the script
+**Run the script**
 
 ```bash
-time ./00_scripts/02_fastqc_loop.sh
+time 00_scripts/02_fastqc_loop.sh
 ```
 
 <details>
@@ -196,28 +207,58 @@ The log file shows the progress of the FastQC analysis for just the last file.
 Let us now make sure that we have a log file for each file. 
 
 ```bash
-mkdir -p 02c_fastqc_loop_samplename
-for file in 01_data/*.fastq.gz; 
+module purge
+module load fastqc
+
+INPUT_DIR=01_data
+OUTPUT_DIR=04_fastqc_loop_samplename
+LOG_DIR=logs
+
+mkdir -p $OUTPUT_DIR $LOG_DIR
+
+for file in $INPUT_DIR/*.fastq.gz 
 do  
   sample_id=$(basename "$file" .fastq.gz)
   echo "Running FastQC on: $sample_id"
-  fastqc $file -o 02c_fastqc_loop_samplename/ > logs/02_fastqc_loop_$sample_id.log 2>&1
+  fastqc $file -o $OUTPUT_DIR/ > $LOG_DIR/03_fastqc_loop_$sample_id.log 2>&1
 done
 ```
+
+Using shell variables in the loop helps to make the script more readable, maintainable, and reusable.
 
 Save this script as `03_fastqc_loop_samplename.sh` in `00_scripts` directory.
 
 Make it executable:
 
 ```bash
-chmod +x 00_scripts/02_fastqc_loop_samplename.sh
+chmod +x 00_scripts/03_fastqc_loop_samplename.sh
 ```
 
-Run the script:
+**Run the script:**
 
 ```bash
-time ./00_scripts/02_fastqc_loop_samplename.sh
+time 00_scripts/03_fastqc_loop_samplename.sh
 ```
+
+<details>
+<summary>Output</summary>
+<pre>
+Running FastQC on: bio_sample_01_R1
+Running FastQC on: bio_sample_01_R2
+Running FastQC on: bio_sample_02_R1
+Running FastQC on: bio_sample_02_R2
+Running FastQC on: bio_sample_03_R1
+Running FastQC on: bio_sample_03_R2
+Running FastQC on: bio_sample_04_R1
+Running FastQC on: bio_sample_04_R2
+Running FastQC on: bio_sample_05_R1
+Running FastQC on: bio_sample_05_R2
+
+real    1m11.971s
+user    1m31.266s
+sys     0m3.074s
+</pre>
+</details>
 
 Check the log files:
 
@@ -249,23 +290,6 @@ logs/02_fastqc_loop_bio_sample_05_R2.log:Analysis complete for bio_sample_05_R2.
 </pre>
 </details>
 
-##### Using shell variables in the loop helps to make the script more readable, maintainable, and reusable.
-
-```bash
-INPUT_DIR=01_data
-OUTPUT_DIR=02c_fastqc_loop_samplename
-LOG_DIR=logs
-
-mkdir -p $OUTPUT_DIR
-
-for file in $INPUT_DIR/*.fastq.gz; 
-do  
-  basename=$(basename "$file" .fastq.gz)
-  echo "Running FastQC on: $basename"
-  fastqc $file -o $OUTPUT_DIR/ &> $LOG_DIR/02_fastqc_loop_$basename.log
-done
-```
-
 #### Multiple files (GNU Parallel)
 
 Let us now use GNU Parallel to run the FastQC analysis on all files in parallel.
@@ -273,24 +297,28 @@ The first step is go for a dry run to see what commands will be executed.
 
 ```bash
 module load parallel 
-mkdir -p 02d_fastqc_parallel
-parallel --dry-run -j 8 fastqc {} -o 02d_fastqc_parallel/ ::: 01_data/*.fastq.gz
+mkdir -p 05_fastqc_parallel
+parallel --dry-run -j 10 fastqc {} -o 05_fastqc_parallel/ ::: 01_data/*.fastq.gz
 ```
 
-- `parallel --dry-run -j 8 fastqc {} -o 02d_fastqc_parallel/ ::: 01_data/*.fastq.gz`
+- `parallel --dry-run -j 8 fastqc {} -o 05_fastqc_parallel/ ::: 01_data/*.fastq.gz`
   - `--dry-run` prints the commands that would be executed, without running them. Use this to verify first.
   - `-j 8` means run up to 8 jobs at the same time (choose based on cores available to you).
   - `fastqc {}` is the command template; `{}` will be replaced by each input filename.
-  - `-o 02d_fastqc_parallel/` sends FastQC outputs into that directory.
+  - `-o 05_fastqc_parallel/` sends FastQC outputs into that directory.
   - `:::` introduces the list of inputs to feed to GNU Parallel; here the shell expands `01_data/*.fastq.gz` to all matching files.
 
 To actually run the commands (not just show them), remove `--dry-run`:
 
 ```bash
+module purge
 module load parallel
-mkdir -p 02d_fastqc_parallel
-parallel -j8 --dry-run \
-  'fastqc {1} -o 02d_fastqc_parallel/ > logs/02_fastqc_parallel_{1/.}.log 2>&1' \
+module load fastqc 
+
+mkdir -p 05_fastqc_parallel
+
+parallel -j10 \
+  'fastqc {1} -o 05_fastqc_parallel/ > logs/04_fastqc_parallel_{1/.}.log 2>&1' \
   ::: 01_data/*.fastq.gz
 ```
 
@@ -308,7 +336,7 @@ Make it executable:
 chmod +x 00_scripts/04_fastqc_parallel.sh
 ```
 
-Run the script:
+**Run the script**
 
 ```bash
 time ./00_scripts/04_fastqc_parallel.sh
@@ -323,11 +351,6 @@ sys     0m3.962s
 </pre>
 </details>
 
-- **What these mean**
-  - `real`: Wall-clock time — how long the command took from start to finish in the real world (what you waited).
-  - `user`: Total CPU time spent running your program’s code in user space. With multiple cores or parallel jobs, this is the sum across all processes/cores and can be greater than `real`.
-  - `sys`: CPU time spent in the kernel (e.g., doing I/O, file operations).
-
 - **Why `user` > `real` here**
   - Because we ran multiple tasks concurrently (e.g., via loops or GNU Parallel), CPU time across cores adds up. If 8 cores each do ~15 seconds of work, `user` could be ~120 seconds while `real` is ~15–30 seconds.
 
@@ -335,7 +358,7 @@ sys     0m3.962s
   - Use `real` to estimate elapsed time for the end-to-end run (what you experience).
   - Use `user + sys` to gauge how much total CPU work was consumed. Large gaps between `real` and `user+sys` often indicate parallelism; very small `user`/`sys` compared to `real` can indicate waiting on I/O.
 
-#### Cleaned up shell script
+#### Cleaner shell script
 
 ```bash
 #!/usr/bin/env bash # shebang or hashbang line
