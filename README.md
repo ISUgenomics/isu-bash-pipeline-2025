@@ -7,6 +7,9 @@ Workshop 2 is an introductory course into pipeline development within a bash env
 - Rick Masonbrink
 - Sharu Paul Sharma
 
+## Email
+gifhelp@iastate.edu
+
 ## Quick start
 
 - VS Code Server on Nova OnDemand through a browser: `https://nova-ondemand.its.iastate.edu/`
