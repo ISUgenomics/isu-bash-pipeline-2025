@@ -65,7 +65,14 @@ Remove the folders created
 rm -r 02_fastqc
 ```
 
-Open `00_scripts/01_fastqc.sh` in the script window. 
+Create `00_scripts` directory and within that create `01_fastqc.sh`.
+
+```bash
+mkdir -p 00_scripts
+touch 00_scripts/01_fastqc.sh
+```
+
+Copy the contents of the code block below into `01_fastqc.sh`.
 
 ```bash
 module purge
